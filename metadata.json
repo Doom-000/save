@@ -1,0 +1,6 @@
+{
+  "name": "Surapa Garden Manual",
+  "description": "🌿 Surapa Garden - คู่มือธุรกิจและคลังความรู้ (Business Manual & Knowledge Library) สำหรับผู้รับเหมาจัดสวนครบวงจร 12+ บทเรียนและตารางราคาประเมิน",
+  "requestFramePermissions": ["geolocation", "camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

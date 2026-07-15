@@ -489,6 +489,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
           email: cleanEmail,
           avatar: finalAvatar,
           role: cleanEmail.toLowerCase() === "supawit.duna@sbac.ac.th" ? "admin" : "user",
+          isPremium: false,
           savedIds: [],
           completedIds: [],
           notes: {},

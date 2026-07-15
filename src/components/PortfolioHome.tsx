@@ -173,6 +173,9 @@ export default function PortfolioHome({ user, onUpdateUser, onLogout, onDeleteAc
   const [themeColor, setThemeColor] = useState<string>(() => {
     return localStorage.getItem("surapa_theme_color") || "green";
   });
+  const [hasPremium, setHasPremium] = useState<boolean>(() => {
+    return user.isPremium || false;
+  });
   const [showThemeDropdown, setShowThemeDropdown] = useState(false);
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -295,6 +298,10 @@ export default function PortfolioHome({ user, onUpdateUser, onLogout, onDeleteAc
   const [customItemName, setCustomItemName] = useState("");
   const [customItemPrice, setCustomItemPrice] = useState("");
   const [customItemQty, setCustomItemQty] = useState("1");
+
+  useEffect(() => {
+    setHasPremium(user.isPremium || false);
+  }, [user.isPremium]);
   const [customItemUnit, setCustomItemUnit] = useState("ต้น");
 
   const DEFAULT_PLANTS = [
@@ -618,6 +625,33 @@ export default function PortfolioHome({ user, onUpdateUser, onLogout, onDeleteAc
     });
   };
 
+  const handleSubscribePremium = () => {
+    if (hasPremium) return;
+    const updatedUser = {
+      ...user,
+      isPremium: true
+    };
+    onUpdateUser(updatedUser);
+    setHasPremium(true);
+    alert("ยินดีด้วย! คุณได้เป็นผู้ใช้ Premium แล้ว");
+  };
+
+  const premiumTextColor = themeColor.startsWith("#") ? themeColor : {
+    green: "#10b981",
+    white: "#71717a",
+    gray: "#6b7280",
+    yellow: "#eab308",
+    red: "#ef4444",
+    blue: "#3b82f6"
+  }[themeColor as keyof Record<string, string>] || "#10b981";
+
+  const premiumBadgeStyle = {
+    borderColor: premiumTextColor,
+    color: premiumTextColor,
+    backgroundColor: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(16,185,129,0.08)",
+    boxShadow: `0 0 16px ${premiumTextColor}22`
+  };
+
   // Article Workbook Saving
   const [articleNotes, setArticleNotes] = useState<Record<string, Record<number, string>>>(() => {
     return user.notes ? JSON.parse(JSON.stringify(user.notes)) : {};
@@ -858,6 +892,26 @@ export default function PortfolioHome({ user, onUpdateUser, onLogout, onDeleteAc
               )}
             </button>
 
+            <div className="flex items-center gap-2">
+              {!hasPremium ? (
+                <button
+                  onClick={handleSubscribePremium}
+                  className="px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20 text-sm font-bold uppercase tracking-wider hover:from-emerald-600 hover:to-teal-600 transition-all"
+                >
+                  สมัคร Premium
+                </button>
+              ) : (
+                <span
+                  className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-[0_0_15px_rgba(0,0,0,0.12)]"
+                  style={premiumBadgeStyle}
+                  title="ผู้ใช้ Premium"
+                >
+                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: premiumTextColor }} />
+                  ผู้ใช้ Premium
+                </span>
+              )}
+            </div>
+
             {/* Admin Notifications */}
             {user.role === 'admin' && <AdminOrderNotifications />}
             
@@ -868,14 +922,27 @@ export default function PortfolioHome({ user, onUpdateUser, onLogout, onDeleteAc
                 alt={user.name} 
                 className="w-8 h-8 rounded-full border border-emerald-500/30 object-cover"
               />
-              <span className="text-sm font-semibold max-w-[80px] truncate hidden sm:inline text-[#3E4341] dark:text-slate-300">
-                {user.name}
-              </span>
-              {user.role === 'admin' && (
-                <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/20 mr-1 hidden sm:inline-block">
-                  ADMIN
-                </span>
-              )}
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold max-w-[120px] truncate hidden sm:inline text-[#3E4341] dark:text-slate-300">
+                    {user.name}
+                  </span>
+                  {user.role === 'admin' && (
+                    <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/20 mr-1 hidden sm:inline-block">
+                      ADMIN
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-gray-500 dark:text-slate-400 truncate hidden sm:inline">{user.email}</span>
+                  {hasPremium && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-current px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-[0_0_15px_rgba(0,0,0,0.18)]" style={{ color: premiumTextColor, borderColor: premiumTextColor }}>
+                      <span className="block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: premiumTextColor }} />
+                      Premium
+                    </span>
+                  )}
+                </div>
+              </div>
               
               <div className="relative">
                 <button 
@@ -2306,9 +2373,19 @@ export default function PortfolioHome({ user, onUpdateUser, onLogout, onDeleteAc
                     </div>
                   </div>
                   
-                  <button className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl font-semibold shadow-sm transition-all focus:ring-4 focus:ring-emerald-600/20">
-                    สมัครแพ็คเกจ
+                  <button
+                    onClick={handleSubscribePremium}
+                    className={`w-full py-3.5 px-4 rounded-xl font-semibold shadow-sm transition-all focus:ring-4 ${hasPremium ? "bg-slate-500 text-white cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white"}`}
+                    style={hasPremium ? { boxShadow: `0 0 20px rgba(0,0,0,0.12)` } : { boxShadow: `0 20px 40px -15px ${premiumTextColor}80` }}
+                    disabled={hasPremium}
+                  >
+                    {hasPremium ? "คุณเป็น Premium แล้ว" : "สมัครแพ็คเกจ"}
                   </button>
+                  {hasPremium && (
+                    <p className="mt-3 text-sm text-[#64748b] dark:text-slate-400">
+                      คุณกำลังใช้งานสิทธิ Premium อยู่แล้ว
+                    </p>
+                  )}
                 </div>
               </div>
             </motion.div>

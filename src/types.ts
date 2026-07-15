@@ -96,6 +96,7 @@ export interface UserProfile {
   email: string;
   avatar: string;
   role?: "admin" | "user";
+  isPremium?: boolean;
   savedIds: string[];
   completedIds: string[];
   notes: Record<string, string>; // cardId -> personal workbook answers
